@@ -1,14 +1,24 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"log"
+	"os"
+
+	"hnex.com/internal/api"
 	"hnex.com/internal/config"
 )
 
 func main() {
-	router := gin.Default()
+	env := config.LoadEnv()
+	db, err := config.ConnectDB(env.DATABASE_URL)
+	if err != nil {
+		log.Fatal("Error connecting to database: ", err)
+	}
 
-	config.SetupRouter(router)
+	hostname, err := os.Hostname()
+	if err != nil {
+		log.Fatal("Error getting hostname: ", err)
+	}
 
-	router.Run()
+	api.Start(env, db, hostname)
 }
