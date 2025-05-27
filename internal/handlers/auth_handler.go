@@ -1,10 +1,14 @@
 package handlers
 
 import (
+	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
+	"hnex.com/internal/config"
 	dtos "hnex.com/internal/dtos/auth"
 	"hnex.com/internal/models"
 	"hnex.com/internal/services"
@@ -148,18 +152,20 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 	}
 
 	userID := claims.(*utils.JWTClaims).Sub
-	existingUser, err := h.Service.UserRepository.FindById(userID)
+	role := claims.(*utils.JWTClaims).Role
+
+	hashedRefreshToken, err := config.RedisClient.Get(context.Background(), fmt.Sprintf("user:%d:refresh_token", userID)).Result()
 	if err != nil {
+		if err == redis.Nil {
+			c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "User has logged out"})
+			return
+		}
+
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 0, "msg": err.Error()})
 		return
 	}
 
-	if existingUser == nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": "User not found"})
-		return
-	}
-
-	match, err := utils.VerifyPassword(refreshToken.RefreshToken, existingUser.Password)
+	match, err := utils.VerifyPassword(refreshToken.RefreshToken, hashedRefreshToken)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": err.Error()})
 		return
@@ -170,13 +176,13 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	accessToken, newRefreshToken, err := utils.GenerateTokens(int32(existingUser.ID), existingUser.Role)
+	accessToken, newRefreshToken, err := utils.GenerateTokens(int32(userID), role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 0, "msg": err.Error()})
 		return
 	}
 
-	err = h.Service.UpdateRefreshToken(int32(existingUser.ID), &newRefreshToken)
+	err = h.Service.UpdateRefreshToken(int32(userID), &newRefreshToken)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 0, "msg": err.Error()})
 		return
