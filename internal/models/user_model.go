@@ -20,9 +20,10 @@ const (
 type User struct {
 	BaseModel
 
-	Email         string     `json:"email" gorm:"unique"`
+	Email         string     `json:"email"`
 	Password      string     `json:"password"`
 	DisplayName   string     `json:"display_name"`
+	Provider      string     `json:"provider" gorm:"default:native"`
 	Role          Role       `json:"role" gorm:"default:USER"`
 	Gender        Gender     `json:"gender" gorm:"default:UNKNOWN"`
 	Username      *string    `json:"username" gorm:"unique"`

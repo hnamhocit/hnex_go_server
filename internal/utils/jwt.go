@@ -12,12 +12,13 @@ import (
 )
 
 type JWTClaims struct {
-	Sub  uint32      `json:"sub"`
-	Role models.Role `json:"role"`
+	Sub      string      `json:"sub"`
+	Role     models.Role `json:"role"`
+	Provider string      `json:"provider"`
 	jwt.RegisteredClaims
 }
 
-func GenerateTokens(userID uint32, role models.Role) (accessToken, refreshToken string, err error) {
+func GenerateTokens(userID string, role models.Role, provider string) (accessToken, refreshToken string, err error) {
 
 	accessTokenSecret := []byte(os.Getenv("JWT_ACCESS_SECRET"))
 	refreshTokenSecret := []byte(os.Getenv("JWT_REFRESH_SECRET"))
@@ -33,14 +34,15 @@ func GenerateTokens(userID uint32, role models.Role) (accessToken, refreshToken 
 	}
 
 	accessClaims := &JWTClaims{
-		Sub:  userID,
-		Role: role,
+		Sub:      userID,
+		Role:     role,
+		Provider: provider,
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(JWT_ACCESS_EXPIRES_IN) * time.Second)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
-			Issuer:    "hnex.com",
-			Audience:  []string{"access"},
+			Issuer:    "hnex.api.com",
+			Audience:  []string{"access", provider},
 		},
 	}
 
@@ -56,8 +58,8 @@ func GenerateTokens(userID uint32, role models.Role) (accessToken, refreshToken 
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Duration(JWT_REFRESH_EXPIRES_IN) * time.Second)),
 			IssuedAt:  jwt.NewNumericDate(time.Now()),
 			NotBefore: jwt.NewNumericDate(time.Now()),
-			Issuer:    "hnex.com",
-			Audience:  []string{"refresh"},
+			Issuer:    "hnex.api.com",
+			Audience:  []string{"refresh", provider},
 		},
 	}
 

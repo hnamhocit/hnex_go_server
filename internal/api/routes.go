@@ -12,7 +12,6 @@ import (
 	"hnex.com/internal/handlers"
 	"hnex.com/internal/middlewares"
 	"hnex.com/internal/repositories"
-	"hnex.com/internal/services"
 )
 
 func Start(env *config.Env, db *gorm.DB, hostname string) {
@@ -33,25 +32,18 @@ func Start(env *config.Env, db *gorm.DB, hostname string) {
 		userRepository := repositories.UserRepository{DB: db}
 		authRepository := repositories.AuthRepository{DB: db}
 
-		authService := services.AuthService{
-			Repository:     authRepository,
-			UserRepository: userRepository,
-		}
-
-		authHandler := handlers.AuthHandler{Service: authService}
+		authHandler := handlers.AuthHandler{Repository: authRepository, UserRepository: userRepository}
 		auth := api.Group("/auth")
 		{
 			auth.POST("/register", authHandler.Register)
 			auth.POST("/login", authHandler.Login)
 			auth.GET("/logout", middlewares.AccessTokenMiddleware, authHandler.Logout)
 			auth.POST("/refresh", authHandler.RefreshToken)
+			auth.GET("/google", authHandler.GoogleAuth)
+			auth.GET("/facebook", authHandler.FacebookAuth)
 		}
 
-		userService := services.UserService{
-			Repository: userRepository,
-		}
-
-		userHandler := handlers.UserHandler{Service: userService}
+		userHandler := handlers.UserHandler{Repository: userRepository}
 		user := api.Group("/user")
 		{
 			user.GET("/profile", middlewares.AccessTokenMiddleware, userHandler.GetProfile)

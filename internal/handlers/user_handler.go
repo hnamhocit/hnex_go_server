@@ -4,24 +4,18 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"hnex.com/internal/services"
+	"hnex.com/internal/repositories"
 	"hnex.com/internal/utils"
 )
 
 type UserHandler struct {
-	Service services.UserService
+	Repository repositories.UserRepository
 }
 
 func (h *UserHandler) GetUser(c *gin.Context) {
 	id := c.Param("id")
 
-	_id, err := utils.ConvertID(id)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"code": 0, "msg": err.Error()})
-		return
-	}
-
-	user, err := h.Service.Repository.FindById(_id)
+	user, err := h.Repository.FindById(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -46,7 +40,7 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 		return
 	}
 
-	user, err := h.Service.Repository.FindById(claims.Sub)
+	user, err := h.Repository.FindById(claims.Sub)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"code": 0, "msg": err.Error()})
 		return
