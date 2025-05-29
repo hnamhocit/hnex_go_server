@@ -46,6 +46,17 @@ func Start(env *config.Env, db *gorm.DB, hostname string) {
 			auth.GET("/logout", middlewares.AccessTokenMiddleware, authHandler.Logout)
 			auth.POST("/refresh", authHandler.RefreshToken)
 		}
+
+		userService := services.UserService{
+			Repository: userRepository,
+		}
+
+		userHandler := handlers.UserHandler{Service: userService}
+		user := api.Group("/user")
+		{
+			user.GET("/profile", middlewares.AccessTokenMiddleware, userHandler.GetProfile)
+			user.GET("/:id", userHandler.GetUser)
+		}
 	}
 
 	log.Printf("Starting server on port %s:%d", hostname, env.PORT)

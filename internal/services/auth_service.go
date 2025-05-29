@@ -15,7 +15,7 @@ type AuthService struct {
 	UserRepository repositories.UserRepository
 }
 
-func (s *AuthService) UpdateRefreshToken(id int32, refreshToken *string) error {
+func (s *AuthService) UpdateRefreshToken(id uint32, refreshToken *string) error {
 	var hashedRefreshToken *string
 
 	if refreshToken == nil {

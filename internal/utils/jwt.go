@@ -12,12 +12,12 @@ import (
 )
 
 type JWTClaims struct {
-	Sub  int32       `json:"sub"`
+	Sub  uint32      `json:"sub"`
 	Role models.Role `json:"role"`
 	jwt.RegisteredClaims
 }
 
-func GenerateTokens(userID int32, role models.Role) (accessToken, refreshToken string, err error) {
+func GenerateTokens(userID uint32, role models.Role) (accessToken, refreshToken string, err error) {
 
 	accessTokenSecret := []byte(os.Getenv("JWT_ACCESS_SECRET"))
 	refreshTokenSecret := []byte(os.Getenv("JWT_REFRESH_SECRET"))

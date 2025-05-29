@@ -55,13 +55,13 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		return
 	}
 
-	accessToken, refreshToken, err := utils.GenerateTokens(int32(userModel.ID), userModel.Role)
+	accessToken, refreshToken, err := utils.GenerateTokens(userModel.ID, userModel.Role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 0, "msg": err.Error()})
 		return
 	}
 
-	err = h.Service.UpdateRefreshToken(int32(userModel.ID), &refreshToken)
+	err = h.Service.UpdateRefreshToken(userModel.ID, &refreshToken)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 0, "msg": err.Error()})
 		return
@@ -102,13 +102,13 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		return
 	}
 
-	accessToken, refreshToken, err := utils.GenerateTokens(int32(existingUser.ID), existingUser.Role)
+	accessToken, refreshToken, err := utils.GenerateTokens(existingUser.ID, existingUser.Role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 0, "msg": err.Error()})
 		return
 	}
 
-	err = h.Service.UpdateRefreshToken(int32(existingUser.ID), &refreshToken)
+	err = h.Service.UpdateRefreshToken(existingUser.ID, &refreshToken)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 0, "msg": err.Error()})
 		return
@@ -176,13 +176,13 @@ func (h *AuthHandler) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	accessToken, newRefreshToken, err := utils.GenerateTokens(int32(userID), role)
+	accessToken, newRefreshToken, err := utils.GenerateTokens(userID, role)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 0, "msg": err.Error()})
 		return
 	}
 
-	err = h.Service.UpdateRefreshToken(int32(userID), &newRefreshToken)
+	err = h.Service.UpdateRefreshToken(userID, &newRefreshToken)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 0, "msg": err.Error()})
 		return
