@@ -23,9 +23,9 @@ func Start(env *config.Env, db *gorm.DB, hostname string) {
 		AllowHeaders: []string{"*"},
 	}))
 
-	api := app.Group("/api")
+	api := app.Group("api")
 	{
-		api.GET("/health", func(c *gin.Context) {
+		api.GET("health", func(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{"message": "OK"})
 		})
 
@@ -33,21 +33,21 @@ func Start(env *config.Env, db *gorm.DB, hostname string) {
 		authRepository := repositories.AuthRepository{DB: db}
 
 		authHandler := handlers.AuthHandler{Repository: authRepository, UserRepository: userRepository}
-		auth := api.Group("/auth")
+		auth := api.Group("auth")
 		{
-			auth.POST("/register", authHandler.Register)
-			auth.POST("/login", authHandler.Login)
-			auth.GET("/logout", middlewares.AccessTokenMiddleware, authHandler.Logout)
-			auth.POST("/refresh", authHandler.RefreshToken)
-			auth.GET("/google", authHandler.GoogleAuth)
-			auth.GET("/facebook", authHandler.FacebookAuth)
+			auth.POST("register", authHandler.Register)
+			auth.POST("login", authHandler.Login)
+			auth.GET("logout", middlewares.AccessTokenMiddleware, authHandler.Logout)
+			auth.POST("refresh", authHandler.RefreshToken)
+			auth.GET("google", authHandler.GoogleAuth)
+			auth.GET("facebook", authHandler.FacebookAuth)
 		}
 
 		userHandler := handlers.UserHandler{Repository: userRepository}
-		users := api.Group("/users")
+		users := api.Group("users")
 		{
-			users.GET("/profile", middlewares.AccessTokenMiddleware, userHandler.GetProfile)
-			users.GET("/:id", userHandler.GetUser)
+			users.GET("profile", middlewares.AccessTokenMiddleware, userHandler.GetProfile)
+			users.GET(":id", userHandler.GetUser)
 		}
 	}
 

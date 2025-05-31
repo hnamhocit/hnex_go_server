@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -30,13 +31,15 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 func (h *UserHandler) GetProfile(c *gin.Context) {
 	user, ok := c.Get("user")
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"code": 0, "msg": "Unauthorized"})
+		log.Println("User context not found")
+		c.JSON(http.StatusUnauthorized, gin.H{"code": 0, "msg": "User context not found"})
 		return
 	}
 
-	claims, ok := user.(utils.JWTClaims)
+	claims, ok := user.(*utils.JWTClaims)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"code": 0, "msg": "Unauthorized"})
+		log.Println("Convert user context to JWTClaims failed")
+		c.JSON(http.StatusUnauthorized, gin.H{"code": 0, "msg": "Convert user context to JWTClaims failed"})
 		return
 	}
 

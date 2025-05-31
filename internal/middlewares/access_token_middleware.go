@@ -18,7 +18,7 @@ func AccessTokenMiddleware(c *gin.Context) {
 	token := strings.Split(authorization, " ")[1]
 	claims, err := utils.VerifyToken(token, "JWT_ACCESS_SECRET")
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"code": 0, "msg": "Unauthorized"})
+		c.JSON(http.StatusUnauthorized, gin.H{"code": 0, "msg": err.Error()})
 		c.Abort()
 	}
 
