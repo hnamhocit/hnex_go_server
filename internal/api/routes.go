@@ -44,10 +44,10 @@ func Start(env *config.Env, db *gorm.DB, hostname string) {
 		}
 
 		userHandler := handlers.UserHandler{Repository: userRepository}
-		user := api.Group("/user")
+		users := api.Group("/users")
 		{
-			user.GET("/profile", middlewares.AccessTokenMiddleware, userHandler.GetProfile)
-			user.GET("/:id", userHandler.GetUser)
+			users.GET("/profile", middlewares.AccessTokenMiddleware, userHandler.GetProfile)
+			users.GET("/:id", userHandler.GetUser)
 		}
 	}
 
